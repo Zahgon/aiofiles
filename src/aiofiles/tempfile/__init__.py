@@ -41,22 +41,7 @@ if sys.version_info >= (3, 12):
         executor=None,
     ):
         """Async open a named temporary file"""
-        return AiofilesContextManager(
-            _temporary_file(
-                named=True,
-                mode=mode,
-                buffering=buffering,
-                encoding=encoding,
-                newline=newline,
-                suffix=suffix,
-                prefix=prefix,
-                dir=dir,
-                delete=delete,
-                delete_on_close=delete_on_close,
-                loop=loop,
-                executor=executor,
-            )
-        )
+        pass
 
 else:
 
@@ -73,21 +58,7 @@ else:
         executor=None,
     ):
         """Async open a named temporary file"""
-        return AiofilesContextManager(
-            _temporary_file(
-                named=True,
-                mode=mode,
-                buffering=buffering,
-                encoding=encoding,
-                newline=newline,
-                suffix=suffix,
-                prefix=prefix,
-                dir=dir,
-                delete=delete,
-                loop=loop,
-                executor=executor,
-            )
-        )
+        pass
 
 
 def TemporaryFile(
@@ -102,20 +73,7 @@ def TemporaryFile(
     executor=None,
 ):
     """Async open an unnamed temporary file"""
-    return AiofilesContextManager(
-        _temporary_file(
-            named=False,
-            mode=mode,
-            buffering=buffering,
-            encoding=encoding,
-            newline=newline,
-            suffix=suffix,
-            prefix=prefix,
-            dir=dir,
-            loop=loop,
-            executor=executor,
-        )
-    )
+    pass
 
 
 def SpooledTemporaryFile(
@@ -131,29 +89,12 @@ def SpooledTemporaryFile(
     executor=None,
 ):
     """Async open a spooled temporary file"""
-    return AiofilesContextManager(
-        _spooled_temporary_file(
-            max_size=max_size,
-            mode=mode,
-            buffering=buffering,
-            encoding=encoding,
-            newline=newline,
-            suffix=suffix,
-            prefix=prefix,
-            dir=dir,
-            loop=loop,
-            executor=executor,
-        )
-    )
+    pass
 
 
 def TemporaryDirectory(suffix=None, prefix=None, dir=None, loop=None, executor=None):
     """Async open a temporary directory"""
-    return AiofilesContextManagerTempDir(
-        _temporary_directory(
-            suffix=suffix, prefix=prefix, dir=dir, loop=loop, executor=executor
-        )
-    )
+    pass
 
 
 # =========================================================
@@ -177,44 +118,7 @@ if sys.version_info >= (3, 12):
         max_size=0,
     ):
         """Async method to open a temporary file with async interface"""
-        if loop is None:
-            loop = asyncio.get_running_loop()
-
-        if named:
-            cb = partial(
-                syncNamedTemporaryFile,
-                mode=mode,
-                buffering=buffering,
-                encoding=encoding,
-                newline=newline,
-                suffix=suffix,
-                prefix=prefix,
-                dir=dir,
-                delete=delete,
-                delete_on_close=delete_on_close,
-            )
-        else:
-            cb = partial(
-                syncTemporaryFile,
-                mode=mode,
-                buffering=buffering,
-                encoding=encoding,
-                newline=newline,
-                suffix=suffix,
-                prefix=prefix,
-                dir=dir,
-            )
-
-        f = await loop.run_in_executor(executor, cb)
-
-        # Wrap based on type of underlying IO object
-        if type(f) is syncTemporaryFileWrapper:
-            # _TemporaryFileWrapper was used (named files)
-            result = wrap(f.file, f, loop=loop, executor=executor)
-            result._closer = f._closer
-            return result
-        # IO object was returned directly without wrapper
-        return wrap(f, f, loop=loop, executor=executor)
+        pass
 
 else:
 
@@ -233,44 +137,7 @@ else:
         max_size=0,
     ):
         """Async method to open a temporary file with async interface"""
-        if loop is None:
-            loop = asyncio.get_running_loop()
-
-        if named:
-            cb = partial(
-                syncNamedTemporaryFile,
-                mode=mode,
-                buffering=buffering,
-                encoding=encoding,
-                newline=newline,
-                suffix=suffix,
-                prefix=prefix,
-                dir=dir,
-                delete=delete,
-            )
-        else:
-            cb = partial(
-                syncTemporaryFile,
-                mode=mode,
-                buffering=buffering,
-                encoding=encoding,
-                newline=newline,
-                suffix=suffix,
-                prefix=prefix,
-                dir=dir,
-            )
-
-        f = await loop.run_in_executor(executor, cb)
-
-        # Wrap based on type of underlying IO object
-        if type(f) is syncTemporaryFileWrapper:
-            # _TemporaryFileWrapper was used (named files)
-            result = wrap(f.file, f, loop=loop, executor=executor)
-            # add delete property
-            result.delete = f.delete
-            return result
-        # IO object was returned directly without wrapper
-        return wrap(f, f, loop=loop, executor=executor)
+        pass
 
 
 async def _spooled_temporary_file(
@@ -286,38 +153,14 @@ async def _spooled_temporary_file(
     executor=None,
 ):
     """Open a spooled temporary file with async interface"""
-    if loop is None:
-        loop = asyncio.get_running_loop()
-
-    cb = partial(
-        syncSpooledTemporaryFile,
-        max_size=max_size,
-        mode=mode,
-        buffering=buffering,
-        encoding=encoding,
-        newline=newline,
-        suffix=suffix,
-        prefix=prefix,
-        dir=dir,
-    )
-
-    f = await loop.run_in_executor(executor, cb)
-
-    # Single interface provided by SpooledTemporaryFile for all modes
-    return AsyncSpooledTemporaryFile(f, loop=loop, executor=executor)
+    pass
 
 
 async def _temporary_directory(
     suffix=None, prefix=None, dir=None, loop=None, executor=None
 ):
     """Async method to open a temporary directory with async interface"""
-    if loop is None:
-        loop = asyncio.get_running_loop()
-
-    cb = partial(syncTemporaryDirectory, suffix, prefix, dir)
-    f = await loop.run_in_executor(executor, cb)
-
-    return AsyncTemporaryDirectory(f, loop=loop, executor=executor)
+    pass
 
 
 class AiofilesContextManagerTempDir(AiofilesContextManager):
@@ -331,27 +174,25 @@ class AiofilesContextManagerTempDir(AiofilesContextManager):
 @singledispatch
 def wrap(base_io_obj, file, *, loop=None, executor=None):
     """Wrap the object with interface based on type of underlying IO"""
-
-    msg = f"Unsupported IO type: {base_io_obj}"
-    raise TypeError(msg)
+    pass
 
 
 @wrap.register(TextIOBase)
 def _(base_io_obj, file, *, loop=None, executor=None):
-    return AsyncTextIOWrapper(file, loop=loop, executor=executor)
+    pass
 
 
 @wrap.register(BufferedWriter)
 def _(base_io_obj, file, *, loop=None, executor=None):
-    return AsyncBufferedIOBase(file, loop=loop, executor=executor)
+    pass
 
 
 @wrap.register(BufferedReader)
 @wrap.register(BufferedRandom)
 def _(base_io_obj, file, *, loop=None, executor=None):
-    return AsyncBufferedReader(file, loop=loop, executor=executor)
+    pass
 
 
 @wrap.register(FileIO)
 def _(base_io_obj, file, *, loop=None, executor=None):
-    return AsyncFileIO(file, loop=loop, executor=executor)
+    pass

@@ -47,20 +47,7 @@ def open(
     loop=None,
     executor=None,
 ):
-    return AiofilesContextManager(
-        _open(
-            file,
-            mode=mode,
-            buffering=buffering,
-            encoding=encoding,
-            errors=errors,
-            newline=newline,
-            closefd=closefd,
-            opener=opener,
-            loop=loop,
-            executor=executor,
-        )
-    )
+    pass
 
 
 async def _open(
@@ -77,50 +64,34 @@ async def _open(
     executor=None,
 ):
     """Open an asyncio file."""
-    if loop is None:
-        loop = asyncio.get_running_loop()
-    cb = partial(
-        sync_open,
-        file,
-        mode=mode,
-        buffering=buffering,
-        encoding=encoding,
-        errors=errors,
-        newline=newline,
-        closefd=closefd,
-        opener=opener,
-    )
-    f = await loop.run_in_executor(executor, cb)
-
-    return wrap(f, loop=loop, executor=executor)
+    pass
 
 
 @singledispatch
 def wrap(file, *, loop=None, executor=None):
-    msg = f"Unsupported io type: {file}."
-    raise TypeError(msg)
+    pass
 
 
 @wrap.register(TextIOBase)
 def _(file, *, loop=None, executor=None):
-    return AsyncTextIOWrapper(file, loop=loop, executor=executor)
+    pass
 
 
 @wrap.register(BufferedWriter)
 @wrap.register(BufferedIOBase)
 def _(file, *, loop=None, executor=None):
-    return AsyncBufferedIOBase(file, loop=loop, executor=executor)
+    pass
 
 
 @wrap.register(BufferedReader)
 @wrap.register(BufferedRandom)
 def _(file, *, loop=None, executor=None):
-    return AsyncBufferedReader(file, loop=loop, executor=executor)
+    pass
 
 
 @wrap.register(FileIO)
 def _(file, *, loop=None, executor=None):
-    return AsyncFileIO(file, loop=loop, executor=executor)
+    pass
 
 
 stdin = AsyncTextIndirectIOWrapper("sys.stdin", None, None, indirect=lambda: sys.stdin)

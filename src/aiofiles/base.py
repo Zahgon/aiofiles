@@ -5,14 +5,7 @@ from functools import partial, wraps
 
 
 def wrap(func):
-    @wraps(func)
-    async def run(*args, loop=None, executor=None, **kwargs):
-        if loop is None:
-            loop = get_running_loop()
-        pfunc = partial(func, *args, **kwargs)
-        return await loop.run_in_executor(executor, pfunc)
-
-    return run
+    pass
 
 
 class AsyncBase:
@@ -23,7 +16,7 @@ class AsyncBase:
 
     @property
     def _loop(self):
-        return self._ref_loop or get_running_loop()
+        pass
 
     def __aiter__(self):
         """We are our own iterator."""
@@ -48,7 +41,7 @@ class AsyncIndirectBase(AsyncBase):
 
     @property
     def _file(self):
-        return self._indirect()
+        pass
 
     @_file.setter
     def _file(self, v):
